@@ -2,7 +2,8 @@ import axios from "axios"
 import { useState } from "react"
 import useUserStore from "../stores/userStore"
 import { useNavigate } from "react-router"
-import { slugify } from "zod"
+import { toast } from "react-toastify"
+import { loginValidator } from "../validators/register.validator"
 
 function Login() {
     const [formLogin, setFormLogin] = useState({
@@ -10,6 +11,12 @@ function Login() {
         password: "",
     })
 
+    const [formData] = useState({
+        username: "",
+        password: "",
+    })
+
+    const [error, setError] = useState(null)
     const setUser = useUserStore((state) => state.setUser)
     const setToken = useUserStore((state) => state.setToken)
     const navigate = useNavigate()
@@ -21,24 +28,30 @@ function Login() {
 
     const hdlSubmit = async (e) => {
         e.preventDefault()
+        setError({})
+        // console.log(formData.password)
+        const result = loginValidator.safeParse(formLogin)
+        if (!result.success) {
+            const { fieldErrors } = result.error.flatten()
+            setError(fieldErrors);
+        }
         try {
+            console.log(formLogin)
             const res = await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/auth/login", formLogin)
             const { userId, username, token } = res.data.user
-            // console.log('token', token)
-            // console.log('username', username)
-            // console.log('userId', userId)
-            setUser({ userId, username,})
+            setUser({ userId, username, })
             setToken(token)
             // console.log(res.data)
+            toast.success('เข้าสู่ระบบสำเร็จ')
             navigate('/to-do-list')
-            console.log(res.data)
+            // console.log(res.data)
         } catch (error) {
-            
+            toast.error('เข้าสู่ระบบผิดพลาด')
         }
     }
 
     return (
-        <div className='bg-gray-900 flex justify-center items-center flex-col'>
+        <div className='bg-gray-900 h-dvh pt-15 flex items-center flex-col'>
             <p className="text-white mt-10 text-5xl">Login Page</p>
             <form
                 onSubmit={hdlSubmit}
@@ -54,6 +67,7 @@ function Login() {
                     onChange={hdlChange}
                     value={formLogin.username}
                 ></input>
+                {error?.username && <p className="text-red-500">{error?.username[0]}</p>}
 
                 <input
                     type='password'
@@ -63,6 +77,7 @@ function Login() {
                     onChange={hdlChange}
                     value={formLogin.password}
                 ></input>
+                {error?.password && <p className="text-red-500">{error?.password[0]}</p>}
 
                 <button className='bg-gray-700 h-15 w-80 rounded-2xl hover:text-red-600 hover:bg-white text-[15px] font-bold'>
                     LOG IN

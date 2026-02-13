@@ -31,61 +31,50 @@ function Todolist() {
     setTask(e.target.value)
   }
 
- async function hdlAdd() {
+  async function hdlAdd() {
     try {
-      const res = await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/todosv2", {content:task},{
+      const res = await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/todosv2", { content: task }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       })
       SetTodo([...todo], res.data)
-
+      setTask("")
       // console.log(res.data)
     } catch (error) {
-      console.log(error)
+      // console.log(error)
     }
   }
 
- async function hdlAdd() {
+  async function hdlDel(id) {
+    // console.log('id', id)
     try {
-      const res = await axios.post("https://drive-accessible-pictures-send.trycloudflare.com/todosv2", {content:task},{
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      SetTodo([...todo], res.data)
-      // console.log(res.data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
- async function hdlDel(id) {
-    try {
-      const res = await axios.delete(`https://drive-accessible-pictures-send.trycloudflare.com/todosv2/delete/${id}` ,
-        { 
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const res = await axios.delete(`https://drive-accessible-pictures-send.trycloudflare.com/todosv2/delete/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
       getUser()
-      // console.log(res.data)
     } catch (error) {
-      console.log(error)
+      // console.log(error)
     }
   }
 
   return (
-    <div className='bg-gray-900 pb-20 flex justify-center items-center flex-col'>
+    <div className='bg-gray-900 h-dvh pb-20 pt-15 flex items-center flex-col'>
       <p className="text-white mt-10 text-5xl">To Do List Page</p>
-      <div
-        className='bg-gray-800 mt-20 mb-20 p-20 text-white flex flex-col gap-7 rounded-2xl'>
+      <div className='bg-gray-800 mt-20 mb-20 p-20 text-white flex flex-col gap-7 rounded-2xl'>
+
         <h1 className='text-[30px]'>My Todo</h1>
+
         <div className="flex justify-between">
-          <input onChange={hdlChange} placeholder='new task'></input>
+          <input onChange={hdlChange} placeholder='new task' value={task}></input>
           <button onClick={hdlAdd} className="bg-blue-600 w-12 rounded-2xl">Add</button>
         </div>
-        <hr className="text-gray-500" />
+
+        <hr className="text-gray-500 w-80" />
+
         <ul className="flex flex-col gap-5">
           {todo.map((el) => (
             <div key={el.id} className="flex justify-between gap-30">
@@ -93,13 +82,15 @@ function Todolist() {
                 <input type="checkbox"></input>
                 <p className="text-white">{el.content}</p>
               </div>
+
               <div className="flex gap-3">
                 <button className="bg-gray-500 w-12 rounded-2xl">Edit</button>
-                <button onClick={hdlDel} className="text-white">X</button>
+                <button onClick={() => hdlDel(el.id)} className="text-white">x</button>
               </div>
             </div>
           ))}
         </ul>
+
       </div>
     </div>
   )
